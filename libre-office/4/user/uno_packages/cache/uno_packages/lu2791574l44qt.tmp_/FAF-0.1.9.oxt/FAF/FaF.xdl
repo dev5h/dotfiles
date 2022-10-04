@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="FaF" dlg:left="130" dlg:top="104" dlg:width="203" dlg:height="138" dlg:closeable="true" dlg:moveable="true" dlg:title="Formatting of all Math formulas">
+ <dlg:bulletinboard>
+  <dlg:numericfield dlg:id="NumericFieldForFontSize" dlg:tab-index="1" dlg:left="105" dlg:top="44" dlg:width="16" dlg:height="11" dlg:strict-format="true" dlg:decimal-accuracy="0" dlg:value="4" dlg:value-min="4" dlg:value-max="20000"/>
+  <dlg:button dlg:id="Formatting" dlg:tab-index="5" dlg:left="110" dlg:top="100" dlg:width="80" dlg:height="12" dlg:value="Formatting all">
+   <script:event script:event-name="on-mousedown" script:macro-name="vnd.sun.star.script:FAF.Module1.OnFormattingClick?language=Basic&amp;location=application" script:language="Script"/>
+  </dlg:button>
+  <dlg:button dlg:id="Close" dlg:tab-index="7" dlg:left="89" dlg:top="118" dlg:width="38" dlg:height="12" dlg:value="Close" dlg:button-type="cancel"/>
+  <dlg:text dlg:id="Tip" dlg:tab-index="6" dlg:left="15" dlg:top="4" dlg:width="180" dlg:height="34" dlg:value="Enter font size in field and select font in drop-down list&#x0a;for formatting all Math formulas in your document&#x0a;The minimum font size is 4&#x0a;Do not enter font size less than 4!" dlg:align="center"/>
+  <dlg:menulist dlg:id="ListTypeFonts" dlg:tab-index="3" dlg:left="105" dlg:top="65" dlg:width="80" dlg:height="12" dlg:spin="true" dlg:linecount="15"/>
+  <dlg:button dlg:id="FormattingOiS" dlg:tab-index="4" dlg:left="14" dlg:top="100" dlg:width="90" dlg:height="12" dlg:value="Formatting only in selection">
+   <script:event script:event-name="on-mousedown" script:macro-name="vnd.sun.star.script:FAF.Module1.OnSelFormattingClick?language=Basic&amp;location=application" script:language="Script"/>
+  </dlg:button>
+  <dlg:progressmeter dlg:id="ProgressBar1" dlg:tab-index="8" dlg:left="13" dlg:top="86" dlg:width="175" dlg:height="10"/>
+  <dlg:checkbox dlg:id="CheckBox1" dlg:tab-index="0" dlg:left="13" dlg:top="46" dlg:width="84" dlg:height="8" dlg:value="Enable changing of font size" dlg:checked="true">
+   <script:event script:event-name="on-itemstatechange" script:macro-name="vnd.sun.star.script:FAF.Module1.OnCheckboxStatusChanged?language=Basic&amp;location=application" script:language="Script"/>
+  </dlg:checkbox>
+  <dlg:checkbox dlg:id="CheckBox2" dlg:tab-index="2" dlg:left="13" dlg:top="66" dlg:width="85" dlg:height="8" dlg:value="Enable changing of font" dlg:checked="true">
+   <script:event script:event-name="on-itemstatechange" script:macro-name="vnd.sun.star.script:FAF.Module1.OnCheckboxStatusChanged?language=Basic&amp;location=application" script:language="Script"/>
+  </dlg:checkbox>
+ </dlg:bulletinboard>
+</dlg:window>

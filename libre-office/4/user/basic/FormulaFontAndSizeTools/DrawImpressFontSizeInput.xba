@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="DrawImpressFontSizeInput" script:language="StarBasic">REM  *****  BASIC  *****
+option explicit
+
+sub main
+	ChangeFormulaSizeDirectly
+end sub	
+&apos; The macro ChangeFormulaSizeDirectly changes the formula font size for selected
+&apos; formulas. The new font size has to be entered in an input box.
+
+&apos; Copyright (C) 2010; Regina Henschel
+&apos; Ask me for licenses, regina@openoffice.org
+
+Rem === How To Use ===
+&apos; To change the font size of a set of formulas first select them and then run the
+&apos; macro ChangeFormulaSizeDirectly. Enter the new font size into the input box.
+&apos; The program effects formulas in nested groups as well.
+&apos; To change _all_ formulas on several slides in Impress, select the slides in the
+&apos; Slide-Sorter and then run the macro ChangeFormulaSizeDirectly.
+
+&apos; Wählen Sie zunächst die Formeln aus und rufen anschließend das Makro
+&apos; ChangeFormulaSizeDirectly auf. Tragen Sie die neue Schriftgröße in das Eingabefeld
+&apos; ein. Die Formeln werden auch innerhalb von geschachtelten Gruppen geändert.
+&apos; Um in Impress _alle_ Formeln auf mehreren Folien zu ändern, wählen Sie die Folien in der
+&apos; Foliensortierung aus und rufen dann das Makro ChangeFormulaSizeDirectly auf.
+
+sub ChangeFormulaSizeDirectly
+dim oCurrentController as variant: oCurrentController = ThisComponent.getCurrentController()
+dim oDoc as variant: oDoc=ThisComponent
+if not(oCurrentController.supportsService(&quot;com.sun.star.drawing.DrawingDocumentDrawView&quot;)) then
+	msgbox(&quot;Only for Draw and Impress documents.&quot;)
+	exit sub
+end if
+dim oShapeCollection as variant: oShapeCollection = oCurrentController.Selection
+if isEmpty(oShapeCollection) then
+	msgbox(&quot;Nothing selected.&quot;)
+	exit sub
+end if
+dim nVarType as integer: nVarType = VarType(oShapeCollection)
+&apos;9 object; Something is selected in Normal view
+&apos;8201=8192+9 array of object; Slides are selected in slide sorter. 
+if nVarType=9 then
+	WorkOnNormalView(oShapeCollection)
+else if nVarType=8201 then
+		WorkOnSlideSorter(oShapeCollection)
+	else
+		exit sub
+	end if
+end if
+oDoc.Modified = true
+end sub
+
+sub WorkOnNormalView(oShapeCollection as variant)
+if not(oShapeCollection.supportsService(&quot;com.sun.star.drawing.ShapeCollection&quot;)) then
+	exit sub
+end if
+dim sValue as string
+sValue = InputBox(&quot;Enter new font size&quot;,&quot;Set Formula Font Size Directly&quot;,&quot;12&quot;)
+dim nNewFontSize as integer: nNewFontSize = CInt(sValue)
+dim nShapeIndex as long
+dim nEndShapeIndex as long: nEndShapeIndex = oShapeCollection.Count-1
+dim oShape as variant
+for nShapeIndex=0 to nEndShapeIndex
+	oShape = oShapeCollection(nShapeIndex)
+	SetCharHeightDeep2(oShape,nNewFontSize) &apos;two parameters
+next nShapeIndex
+end sub
+
+sub WorkOnSlideSorter(oPagesCollection as variant)
+dim nPageIndex as long
+dim nShapeIndex as long
+dim nEndShapeIndex as long
+dim oSelectedPage as variant
+dim oShape as variant
+dim sValue as string
+sValue = InputBox(&quot;Enter new font size&quot;,&quot;Set Formula Font Size Directly&quot;,&quot;12&quot;)
+dim nNewFontSize as integer: nNewFontSize = CInt(sValue)
+&apos; Iterate over all selected pages, then over all shapes.
+for nPageIndex = LBound(oPagesCollection) to UBound(oPagesCollection)
+	oSelectedPage = oPagesCollection(nPageIndex)
+	nEndShapeIndex = oSelectedPage.Count - 1
+	for nShapeIndex=0 to nEndShapeIndex
+		oShape = oSelectedPage(nShapeIndex)
+		SetCharHeightDeep2(oShape,nNewFontSize)
+	next nShapeIndex	
+next nPageIndex
+end sub
+
+sub SetCharHeightDeep2(oShapeInOut as variant, nNewFontSizeIn as integer)
+&apos; recursive solution
+dim sShapeType: sShapeType = oShapeInOut.ShapeType
+if sShapeType = &quot;com.sun.star.drawing.GroupShape&quot; then
+	dim nCount as long: nCount = oShapeInOut.Count
+	dim nIndex as long
+	dim nEndIndex as long: nEndIndex = nCount -1
+	for nIndex = 0 to nEndindex
+		SetCharHeightDeep2(oShapeInOut.getByIndex(nIndex),nNewFontSizeIn)
+	next nIndex
+else
+	if oShapeInOut.supportsService(&quot;com.sun.star.drawing.OLE2Shape&quot;) then
+		if oShapeInOut.CLSID = &quot;078B7ABA-54FC-457F-8551-6147e776a997&quot; then
+			&apos;Math-object
+			dim oModelFormula as variant: oModelFormula = oShapeInOut.Model
+			oModelFormula.BaseFontHeight = nNewFontSizeIn
+		endif
+	endif
+endif
+end sub
+
+
+
+</script:module>

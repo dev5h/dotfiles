@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="WriterSingleFormula" script:language="StarBasic">REM  *****  BASIC  *****
+Option explicit
+
+sub AdaptSingleFormulaToEnvironment
+dim oCurrentController as variant: oCurrentController = ThisComponent.getCurrentController()
+dim oDoc as variant: oDoc=ThisComponent
+if not(oCurrentController.supportsService(&quot;com.sun.star.text.TextDocumentView&quot;)) then
+	msgbox(&quot;Macro works only in text documents.&quot;)
+	exit sub
+end if
+dim oFormula as variant: oFormula = oDoc.CurrentSelection
+if  NOT(oFormula.supportsService(&quot;com.sun.star.text.TextEmbeddedObject&quot;)) then
+    msgbox(&quot;No embedded object selected&quot;)
+    exit sub
+end if
+if  oFormula.CLSID&lt;&gt;&quot;078B7ABA-54FC-457F-8551-6147e776a997&quot; then
+    msgbox(&quot;No Formula selected&quot;)
+    exit sub
+end if
+dim oModelTextDocument as variant: oModelTextDocument = oCurrentController.Model
+dim oModel as variant: oModel = oFormula.Model: rem like edit status
+dim oAnchor as variant: rem for access to the character properties
+dim fCharHeight as single
+dim sCharFontName as String
+dim bIsBold as boolean
+dim EnumItalic: EnumItalic = com.sun.star.awt.FontSlant.ITALIC
+dim EnumOblique: EnumOblique = com.sun.star.awt.FontSlant.OBLIQUE
+dim bIsItalic as boolean
+dim oXCOEO as variant: rem oExtendedControlOverEmbeddedObject
+Rem work on formula
+oAnchor = oFormula.Anchor: rem Is NULL for page anchor
+if Not(isNull(oAnchor)) then
+	if oAnchor.supportsService(&quot;com.sun.star.style.CharacterProperties&quot;) then
+			fCharHeight = oAnchor.CharHeight
+			rem round down for not to break line height
+			oModel.BaseFontHeight = Int(fCharHeight)
+			sCharFontName = oAnchor.CharFontName
+			oModel.FontNameText = sCharFontName
+			oModel.FontNameFunctions = sCharFontName
+			oModel.FontNameVariables = sCharFontName
+			oModel.FontNameNumbers = sCharFontName
+			bIsBold = (oAnchor.CharWeight&gt;=150) 
+			oModel.FontTextIsBold = bIsBold
+			oModel.FontVariablesIsBold = bIsBold
+			oModel.FontFunctionsIsBold = bIsBold
+			oModel.FontNumbersIsBold = bIsBold
+			bIsItalic = (oAnchor.CharPosture = EnumItalic) OR oAnchor.CharPosture = (EnumOblique)
+			oModel.FontTextIsItalic = bIsItalic
+			oModel.FontVariablesIsItalic = true
+			oModel.FontFunctionsIsItalic = false
+			oModel.FontNumbersIsItalic = false
+			oXCOEO = oFormula.ExtendedControlOverEmbeddedObject
+			oXCOEO.update()		
+		end if	
+	end if
+end sub
+</script:module>

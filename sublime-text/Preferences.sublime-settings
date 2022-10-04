@@ -1,0 +1,15 @@
+{
+	"font_size": 15,
+	"font_face": "Fira Code",
+	// Additional spacing at the top of each line, in pixels
+	"line_padding_top": 8,
+	// Additional spacing at the bottom of each line, in pixels
+	"line_padding_bottom": 8,
+
+	"ignored_packages":
+	[
+		"Vintage",
+	],
+	"theme": "ayu-mirage.sublime-theme",
+	"color_scheme": "ayu-mirage.sublime-color-scheme",
+}

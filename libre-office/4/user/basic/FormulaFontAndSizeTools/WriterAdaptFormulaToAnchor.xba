@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="WriterAdaptFormulaToAnchor" script:language="StarBasic">REM  *****  BASIC  *****
+option explicit
+
+sub main
+	AdaptFormulaTextFontAndSizeToEnvironment
+end sub
+
+REM ===== For Textdocuments ======
+&apos;Adapt the formula font size and text font to its anchor object
+
+&apos;Copyright (C) 2011; Regina Henschel
+&apos; Ask me for licenses; regina@openoffice.org
+
+&apos; The macro AdaptFormulaTextFontAndSizeToEnvironment changes Math formulas in the document
+&apos; in the way, that the base font size is set to the font size of the anchor object and the
+&apos; text font is set to the char font of the anchor. The property &quot;bold&quot; or &quot;not bold&quot; of the
+&apos; anchor object is copied to the whole formula. For formulas anchored as character the
+&apos; information left from the formula is used as reference, as it is shown in the formatting
+&apos; toolbar.
+&apos; Formulas anchored to page or frame are not effected because a page or frame hasn&apos;t got
+&apos; a font size.
+
+&apos; Das Makro AdaptFormulaTextFontAndSizeToEnvironment ändert die Schriftgröße der Math
+&apos; Formelobjekte in der Weise, dass die Schriftgröße des Objekts übernommen wird, an dem die
+&apos; Formel verankert ist. Außerdem wird die Schriftart des Objekts als Text-Schriftart der Formel
+&apos; übernommen und die Schrifteigenschaft &quot;fett&quot; bzw. &quot;nicht fett&quot; des Objekts wird auf die
+&apos; gesamte Formel übertragen. Bei Formeln die als Zeichen verankert sind, wird die Information
+&apos; benutzt, die links der Formel steht, so wie sie in der Format-Symbolleiste angezeigt wird.
+&apos; Formeln, die an der Seite oder am Rahmen verankert sind, werden nicht
+&apos; verändert, weil eine Seite bzw. Rahmen keine Eigenschaft &quot;Schriftgröße&quot; besitzt. 
+
+sub AdaptFormulaTextFontAndSizeToEnvironment
+dim oCurrentController as variant: oCurrentController = ThisComponent.getCurrentController()
+dim oDoc as variant: oDoc=ThisComponent
+if not(oCurrentController.supportsService(&quot;com.sun.star.text.TextDocumentView&quot;)) then
+	msgbox(&quot;Macro works only in text documents.&quot;)
+	exit sub
+end if
+dim oModelTextDocument as variant: oModelTextDocument = oCurrentController.Model
+dim oEmbeddedObjects as variant: oEmbeddedObjects = oModelTextDocument.EmbeddedObjects
+dim nIndex as long
+dim nEndIndex as long: nEndIndex = oEmbeddedObjects.Count-1
+dim oEmbeddedObject as variant: rem like green handle status
+dim oModel as variant: rem like edit status
+dim oAnchor as variant: rem for access to the character properties
+dim fCharHeight as single
+dim sCharFontName as String
+dim bIsBold as boolean
+dim EnumItalic: EnumItalic = com.sun.star.awt.FontSlant.ITALIC
+dim EnumOblique: EnumOblique = com.sun.star.awt.FontSlant.OBLIQUE
+dim bIsItalic as boolean
+dim oXCOEO as variant: rem oExtendedControlOverEmbeddedObject
+for nIndex=0 to nEndIndex
+	oEmbeddedObject = oEmbeddedObjects.getByIndex(nIndex)
+	oModel = oEmbeddedObject.Model: rem might be empty; css.comp.math.FormulaDocument
+	if Not(isEmpty(oModel)) then
+		if oModel.supportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) then
+			rem It is a formula object.
+			oAnchor = oEmbeddedObject.Anchor: rem Is NULL for page anchor
+			if Not(isNull(oAnchor)) then
+				if oAnchor.supportsService(&quot;com.sun.star.style.CharacterProperties&quot;) then
+					fCharHeight = oAnchor.CharHeight
+					rem round down for not to break line height
+					oModel.BaseFontHeight = Int(fCharHeight)
+					sCharFontName = oAnchor.CharFontName
+					oModel.FontNameText = sCharFontName
+					bIsBold = (oAnchor.CharWeight&gt;=150) 
+					oModel.FontTextIsBold = bIsBold
+					oModel.FontVariablesIsBold = bIsBold
+					oModel.FontFunctionsIsBold = bIsBold
+					oModel.FontNumbersIsBold = bIsBold
+					bIsItalic = (oAnchor.CharPosture = EnumItalic) OR oAnchor.CharPosture = (EnumOblique)
+					oModel.FontTextIsItalic = bIsItalic
+					oXCOEO = oEmbeddedObject.ExtendedControlOverEmbeddedObject
+					oXCOEO.update()
+				end if
+			end if
+		end if	
+	end if
+next nIndex
+end sub
+
+sub AdaptFormulaAllFontAndSizeToEnvironment
+dim oCurrentController as variant: oCurrentController = ThisComponent.getCurrentController()
+dim oDoc as variant: oDoc=ThisComponent
+if not(oCurrentController.supportsService(&quot;com.sun.star.text.TextDocumentView&quot;)) then
+	msgbox(&quot;Macro works only in text documents.&quot;)
+	exit sub
+end if
+dim oModelTextDocument as variant: oModelTextDocument = oCurrentController.Model
+dim oEmbeddedObjects as variant: oEmbeddedObjects = oModelTextDocument.EmbeddedObjects
+dim nIndex as long
+dim nEndIndex as long: nEndIndex = oEmbeddedObjects.Count-1
+dim oEmbeddedObject as variant: rem like green handle status
+dim oModel as variant: rem like edit status
+dim oAnchor as variant: rem for access to the character properties
+dim fCharHeight as single
+dim sCharFontName as String
+dim bIsBold as boolean
+dim EnumItalic: EnumItalic = com.sun.star.awt.FontSlant.ITALIC
+dim EnumOblique: EnumOblique = com.sun.star.awt.FontSlant.OBLIQUE
+dim bIsItalic as boolean
+dim oXCOEO as variant: rem oExtendedControlOverEmbeddedObject
+for nIndex=0 to nEndIndex
+	oEmbeddedObject = oEmbeddedObjects.getByIndex(nIndex)
+	oModel = oEmbeddedObject.Model: rem might be empty; css.comp.math.FormulaDocument
+	if Not(isEmpty(oModel)) then
+		if oModel.supportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) then
+			rem It is a formula object.
+			oAnchor = oEmbeddedObject.Anchor: rem Is NULL for page anchor
+			if Not(isNull(oAnchor)) then
+				if oAnchor.supportsService(&quot;com.sun.star.style.CharacterProperties&quot;) then
+					fCharHeight = oAnchor.CharHeight
+					rem round down for not to break line height
+					oModel.BaseFontHeight = Int(fCharHeight)
+					sCharFontName = oAnchor.CharFontName
+					oModel.FontNameText = sCharFontName
+					oModel.FontNameFunctions = sCharFontName
+					oModel.FontNameVariables = sCharFontName
+					oModel.FontNameNumbers = sCharFontName
+					bIsBold = (oAnchor.CharWeight&gt;=150) 
+					oModel.FontTextIsBold = bIsBold
+					oModel.FontVariablesIsBold = bIsBold
+					oModel.FontFunctionsIsBold = bIsBold
+					oModel.FontNumbersIsBold = bIsBold
+					bIsItalic = (oAnchor.CharPosture = EnumItalic) OR oAnchor.CharPosture = (EnumOblique)
+					oModel.FontTextIsItalic = bIsItalic
+					oModel.FontVariablesIsItalic = false
+					oModel.FontFunctionsIsItalic = false
+					oModel.FontNumbersIsItalic = false
+					oXCOEO = oEmbeddedObject.ExtendedControlOverEmbeddedObject
+					oXCOEO.update()
+				end if
+			end if
+		end if	
+	end if
+next nIndex
+end sub
+</script:module>

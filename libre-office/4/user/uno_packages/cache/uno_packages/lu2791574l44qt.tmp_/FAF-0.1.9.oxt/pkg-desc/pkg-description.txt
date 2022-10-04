@@ -1,0 +1,5 @@
+FAF-0.1.9.oxt
+Copyright (c) 2020  
+
+<Format all your formulas by one time>
+
